@@ -7598,6 +7598,10 @@ button.bg-dark:focus {
   padding: 3rem !important;
 }
 
+.pt-04 {
+  padding-top: 0.4rem !important;
+}
+
 .pt-5,
 .py-5 {
   padding-top: 3rem !important;
@@ -9284,6 +9288,17 @@ a.text-primary:hover, a.text-primary:focus {
   color: #527a20 !important;
 }
 
+a.custom-button {
+    border: 1px solid #7ab730;
+    padding-right: 6px;
+    color: white;
+    background-color: #7ab730;
+    cursor: pointer;
+    text-decoration: none;
+    padding-left: 7px;
+    border-radius: 5px;
+}
+
 .text-secondary {
   color: #f4faec !important;
 }
@@ -9786,3 +9801,26 @@ h6,
   padding: 0;
   list-style-type: none;
 }
+
+#loading {
+  width: 2rem;
+  height: 2rem;
+  border: 5px solid #f3f3f3;
+  border-top: 6px solid #9c41f2;
+  border-radius: 100%;
+  margin: auto;
+  visibility: hidden;
+  animation: spin 1s infinite linear;
+}
+#loading.display {
+  visibility: visible;
+}
+@keyframes spin {
+  from {
+      transform: rotate(0deg);
+  }
+  to {
+      transform: rotate(360deg);
+  }
+}
+

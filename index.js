@@ -2,8 +2,8 @@ const express = require("express");
 const app = express();
 var path = require('path');
 const port = 3300;
-const routes = require("./routes/routes");
 const usersRouter = require("./routes/users");
+const packagesRouter = require("./routes/packages");
 app.use(express.static(path.join(__dirname, 'public')));
 
 
@@ -18,8 +18,8 @@ app.get("/", (req, res) => {
   res.json({ message: "ok" });
 });
 
-app.use("/routes", routes);
 app.use("/users", usersRouter);
+app.use("/packages", packagesRouter);
 
 /* Error handler middleware */
 app.use((err, req, res, next) => {

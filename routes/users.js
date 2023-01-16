@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const dbService = require("../services/dbService");
+const userService = require("../services/userService");
 
 
 /* GET users listing. */
@@ -9,7 +9,7 @@ const dbService = require("../services/dbService");
 //         const apiResponse = {};
 //         apiResponse.status = true;
 //         apiResponse.message = "hello from express js!!";
-//         apiResponse.data = await dbService.getByUsername(req.query.username);
+//         apiResponse.data = await userService.getByUsername(req.query.username);
 //         res.json(apiResponse);
 //       } catch (err) {
 //         console.error(`Error while getting hell message `, err.message);
@@ -20,7 +20,7 @@ const dbService = require("../services/dbService");
 router.get("/validateUsername", async (req, res, next) => {
   try {
 
-      var rowData = await dbService.isUsernameExists(req.query.registerUsername);
+      var rowData = await userService.isUsernameExists(req.query.registerUsername);
 
       res.set('Content-Type', 'text/html');
       res.send(rowData.IsNewUsername);
@@ -33,7 +33,7 @@ router.get("/validateUsername", async (req, res, next) => {
 router.post("/login", async (req, res, next) => {
   try {
       const apiResponse = {};
-      const userData = await dbService.findUser(req.body);
+      const userData = await userService.findUser(req.body);
       if (userData) {
         apiResponse.success = true;
         apiResponse.data = userData;
@@ -48,10 +48,9 @@ router.post("/login", async (req, res, next) => {
     }
 });
 
-/* POST programming language */
 router.post("/create", async function (req, res, next) {
     try {
-      var rowData = await dbService.isUsernameExists(req.body.username);
+      var rowData = await userService.isUsernameExists(req.body.username);
 
       if (rowData.IsNewUsername == 'false') {
         const apiResponse = {};
@@ -59,7 +58,7 @@ router.post("/create", async function (req, res, next) {
         apiResponse.message = "Username already exists in system";
         res.json(apiResponse);
       } else {
-        res.json(await dbService.create(req.body));
+        res.json(await userService.createUser(req.body));
       }
 
       
