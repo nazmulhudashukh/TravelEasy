@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>TRAVELER - Free Travel Website Template</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="Free HTML Templates" name="keywords">
+    <meta content="Free HTML Templates" name="description">
+
+    <!-- Favicon -->
+    <link href="img/favicon.ico" rel="icon">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"> 
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+    <link href="lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css" rel="stylesheet" />
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="css/style.css" rel="stylesheet">
+     <!-- JavaScript Libraries -->
+     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+     <script src="lib/easing/easing.min.js"></script>
+     <script src="lib/owlcarousel/owl.carousel.min.js"></script>
+     <script src="lib/tempusdominus/js/moment.min.js"></script>
+     <script src="lib/tempusdominus/js/moment-timezone.min.js"></script>
+     <script src="lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
+ 
+     <!-- Contact Javascript File -->
+     <script src="mail/jqBootstrapValidation.min.js"></script>
+     <script src="mail/contact.js"></script>
+ 
+     <!-- Template Javascript -->
+     <script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js">        
+    </script><script type="text/javascript" src="./js/additional-methods.js"></script>
+     <script src="js/utilities.js"></script>
+     <script>
+        
+        $(document).ready(function() {
+            
+            var userData = sessionStorage.getItem('userData');
+
+            if (userData) {
+                var user = JSON.parse(userData);
+                if (!isAdmin(user.Role)) {
+                    window.location.href = '/index.html';
+                }
+                $('._s_LoginUsername').html(user.Name);
+            } else {
+                window.location.href = '/login.html';
+            }
+
+            hideContainers();
+
+            $('._s_Packages').click(function(event) {
+                hideContainers();
+                $('._s_PackageContainer').show();
+            });
+
+            $('._s_Bookings').click(function(event) {
+                hideContainers();
+                $('._s_BookingsContainer').show();
+            });
+
+            $('._s_Reviews').click(function(event) {
+                hideContainers();
+                $('._s_ReviewContainer').show();
+            });
+
+            $('._s_Queries').click(function(event) {
+                hideContainers();
+                $('._s_QueriesContainer').show();
+            });
+
+            $("a._s_Logout").click(function (event) {
+                event.preventDefault();
+                sessionStorage.removeItem('userData');
+                window.location.reload();
+            });
+
+            $("#btnLogin").click(function(e){
+                e.preventDefault();
+                $("#login-form").show();
+                $("#register-form").hide();
+            });
+            $("#btnRegister").click(function(e){
+                $("#register-form").show();
+                $("#login-form").hide();
+            });
+
+
+            $("#userRegisterForm").validate({
+                rules: {
+                    fullName: {
+                        required: true,
+                        minlength: 3,
+                        maxlength: 50  
+                    },
+                    email: {
+                        required: true,
+                        email: true
+                    },
+                    phoneNo: {
+                        required: true,
+                        phoneBD: true
+                    },
+                    address: {
+                        required: true,
+                        minlength: 5,
+                        maxlength: 150 
+                    },
+                    registerUsername: {
+                        required: true,
+                        minlength: 5,
+                        maxlength: 15, 
+                        remote: {
+                            url: "/users/validateUsername",
+                            type: "GET"
+                        } 
+                    },
+                    registerPassword: {
+                        required: true,
+                        minlength: 5,
+                        maxlength: 15
+                    },
+                    confirmPassword: {
+                        required: true,
+                        minlength: 5,
+                        maxlength: 15,
+                        equalTo: "._s_RegisterPassword" //for checking both passwords are same or not
+                    }                
+                },
+                messages: {
+                    fullName: {required: " Please enter your full name"},
+                    email: {required: " Please enter your email"},
+                    phoneNo: {required: " Please enter your phone no"},
+                    address: {required: " Please enter your address"},
+                    registerUsername: {
+                        required: " Please enter username",
+                        minlength: " Your username must consist of at least 5 characters",
+                        remote: " Username already exists"
+                    },
+                    registerPassword: {
+                        required: " Please enter password",
+                        minlength: " Your password must be consist of at least 5 characters"
+                    }
+                },
+                submitHandler: function(form) {
+                    
+                    let newUser = {
+                        "name": $("._s_Name").val(),
+                        "email": $("._s_Email").val(),
+                        "mobileNo": $("._s_PhoneNo").val(),
+                        "address": $("._s_Address").val(),
+                        "username": $("._s_RegisterUsername").val(),
+                        "password": $("._s_RegisterPassword").val()
+                    }
+                    
+
+                    registerUser(newUser);
+
+
+                    return false;
+                }
+            });
+
+            
+            $("#loginForm").validate({
+                rules: {
+                    loginUsername: {
+                        required: true,
+                        minlength: 5
+                    },
+                    loginPassword: {
+                        required: true,
+                        minlength: 5
+                    }
+                },
+                messages: {
+                    loginUsername: {
+                        required: " Please enter username",
+                        minlength: " Your username must consist of at least 5 characters"
+                    },
+                    loginPassword: {
+                        required: " Please enter password",
+                        minlength: " Your password must be consist of at least 5 characters"
+                    }
+                },
+                submitHandler: function(form) {                
+                    let rUser = {
+                        "username": $("._s_LoginUsername").val(),
+                        "password": $("._s_LoginPassword").val()
+                    }
+
+                    submitLogin(rUser);
+
+                    return false;
+                }
+            });
+        });
+
+        function hideContainers() {
+            $('._s_PackageContainer, ._s_BookingsContainer, ._s_ReviewContainer, ._s_QueriesContainer').hide();
+        }
+
+        function submitLogin(rUser) {
+            var requestHeaders = new Headers();
+            requestHeaders.append("Content-Type", "application/json");
+
+            var requestOptions = {
+                method: 'POST',
+                headers: requestHeaders,
+                body: JSON.stringify(rUser)
+            };
+
+            fetch("/users/login", requestOptions)
+                .then(response => response.json())
+                    .then(result => {                    
+
+                        if (result.success == true) {
+                            sessionStorage.setItem('userData', JSON.stringify(result.data));
+                            navigateToPageByUser(result.data.Role);
+                        } else{
+                            alert('Invalid credentials !!!!');
+                        }
+                    })
+                    .catch(error => alert('error', error));
+        }
+
+
+
+        function registerUser(newUser) {
+            $('#loading').show();
+            var requestHeaders = new Headers();
+            requestHeaders.append("Content-Type", "application/json");
+
+            var requestOptions = {
+                method: 'POST',
+                headers: requestHeaders,
+                body: JSON.stringify(newUser)
+            };
+
+            fetch("/users/create", requestOptions)
+                .then(response => response.json())
+                    .then(result => {
+
+                        $('#loading').hide();  
+                        $('#userRegisterForm')[0].reset();
+
+                        if (result.success == true) {
+                            $('._s_Modal_Message').html('<p class="alert alert-success" role="alert">Registration successful.<br/>You can now login with your username: "' + newUser.username + '"</p>');
+                        } else{
+                            $('._s_Modal_Message').html('<p class="alert alert-danger" role="alert">Registration failed.<br/>' + result.message + '<br/>Please try again later.</p>');
+                        }
+
+                        $("#notificationModal").modal('show');
+                    })
+                    .catch(error => alert('error', error));
+        }
+    </script>
+</head>
+
+<body>
+    <!-- Topbar Start -->
+    <div class="container-fluid bg-light d-none d-lg-block">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 text-center text-lg-left mb-2 mb-lg-0">
+                    <div class="d-inline-flex align-items-center">
+                        <p>&nbsp;</p>
+                        <p class="text-body px-3">&nbsp;</p>
+                        <p>&nbsp;</p>
+                    </div>
+                </div>
+                <div class="col-lg-6 text-center text-lg-right">
+                    <div class="d-inline-flex align-items-center">
+                        <div class="d-inline-flex-custom pt-1 _s_LogoutLinkContainer">
+                            <p class="nav-link" style="padding-right: 0 !important;">Welcome, </p>
+                            <div class="nav-item dropdown">
+                                <a href="" class="nav-link dropdown-toggle active _s_LoginUsername" data-toggle="dropdown"></a>
+                                <div class="dropdown-menu border-0 rounded-0 m-0" style="box-shadow: 0 0.5rem 1rem #2d8927 !important;">
+                                    <a class="dropdown-item text-primary _s_Logout" href="#">
+                                        <p>Logout</p>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Topbar End -->
+
+
+    <!-- Navbar Start -->
+    <div class="container-fluid position-relative nav-bar p-0">
+        <div class="container-lg position-relative p-0 px-lg-3" style="z-index: 9;">
+            <nav class="navbar navbar-expand-lg bg-light navbar-light shadow-lg py-3 py-lg-0 pl-3 pl-lg-5">
+                <a href="" class="navbar-brand">
+                    <h1 class="m-0 text-primary"><span class="text-dark">Travel</span>Easy</h1>
+                </a>
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse justify-content-between px-3" id="navbarCollapse">
+                    <div class="navbar-nav ml-auto py-0">Admin Panel
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </div>
+    <!-- Navbar End -->
+
+
+    <!-- Booking Start -->
+    <div class="container-fluid" style="margin-top: -5px !important;">
+        <div class="container">
+            <div class="bg-light shadow" style="padding: 30px;">
+                <div class="row align-items-center" style="min-height: 60px;">
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="mb-3 mb-md-0">
+                                    <div class="mb-3 mb-md-0">
+                                        <button class="btn btn-primary btn-block _s_Packages" type="button" style="height: 47px; margin-top: -2px;"><i class="fas fa-archive"></i>&nbsp;&nbsp;Packages</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="mb-3 mb-md-0">
+                                    <button class="btn btn-primary btn-block _s_Bookings" type="button" style="height: 47px; margin-top: -2px;"><i class="fas fa-shopping-cart"></i>&nbsp;&nbsp;Bookings</button>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="mb-3 mb-md-0">
+                                    <button class="btn btn-primary btn-block _s_Reviews" type="button" style="height: 47px; margin-top: -2px;"><i class="fas fa-window-restore"></i>&nbsp;&nbsp;Reviews</button>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="mb-3 mb-md-0">
+                                    <button class="btn btn-primary btn-block  _s_Queries" type="button" style="height: 47px; margin-top: -2px;"><i class="fas fa-question-circle"></i>&nbsp;&nbsp;Queries</button>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="mb-3 mb-md-0">
+                                    <button class="btn btn-primary btn-block  _s_transports" type="button" style="height: 47px; margin-top: -2px;"><i class="fas fa-train"></i>&nbsp;&nbsp;Transports</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Booking End -->
+    <!-- Option Detail Container Start -->
+    <div class="container-fluid">
+        <div class="container pt-2 pb-3">
+            <div class="text-md-left mb-3 pb-3">
+                <h6 class="text-primary text-uppercase _s_SelectedOption" style="letter-spacing: 2px;"></h6>
+            </div>
+            <div class="row _s_PackageContainer">
+                <div class="col-lg-12">
+                    <div class="contact-form bg-white" style="padding: 30px;">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <button class="btn btn-primary btn-block  _s_Queries" type="button" style="height: 47px; margin-top: -2px;"><i class="fa fa-search"></i> Create Package</button>
+                            </div>
+                        </div>
+                        <table class="table mt-2" style="min-height: 300px;">
+                            <thead>
+                              <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Code</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Location</th>
+                                <th scope="col">Hotel Name</th>
+                                <th scope="col">Total Slot</th>
+                                <th scope="col">Cost Per Person</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <th scope="row">1</th>
+                                <td>Mark</td>
+                                <td>Otto</td>
+                                <td>@mdo</td>
+                                <td>Mark</td>
+                                <td>Otto</td>
+                                <td>@mdo</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                          
+                    </div>
+                    
+
+                </div>
+            </div>
+            <div class="row _s_BookingsContainer">
+                <div class="col-lg-12">
+                    <div class="contact-form bg-white" style="padding: 30px;">
+                        <table class="table mt-2" style="min-height: 300px;">
+                            <thead>
+                              <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Package Code</th>
+                                <th scope="col">Booked By</th>
+                                <th scope="col">Location</th>
+                                <th scope="col">Arival Date</th>
+                                <th scope="col">Return Date</th>
+                                <th scope="col">Total Person</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <th scope="row">1</th>
+                                <td>TP001</td>
+                                <td>ONY</td>
+                                <td>Dinajpur</td>
+                                <td>Feb 01, 2023</td>
+                                <td>Feb 05, 2023</td>
+                                <td>3</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                          
+                    </div>
+                    
+
+                </div>
+            </div>
+            <div class="row _s_ReviewContainer">
+                <div class="col-lg-12">
+                    <div class="contact-form bg-white" style="padding: 30px;">
+                        <table class="table mt-2" style="min-height: 300px;">
+                            <thead>
+                              <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Package Code</th>
+                                <th scope="col">Review By</th>
+                                <th scope="col">Rating</th>
+                                <th scope="col">Comment</th>
+                                <th scope="col">Review Date</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <th scope="row">1</th>
+                                <td>TP001</td>
+                                <td>ONY</td>
+                                <td>9/10</td>
+                                <td>Good tour</td>
+                                <td>Feb 10, 2023</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                          
+                    </div>
+                    
+
+                </div>
+            </div>
+            <div class="row _s_QueriesContainer">
+                <div class="col-lg-12">
+                    <div class="contact-form bg-white" style="padding: 30px;">
+                        <table class="table mt-2" style="min-height: 300px;">
+                            <thead>
+                              <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Query</th>
+                                <th scope="col">Query Date</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <th scope="row">1</th>
+                                <td>Ony</td>
+                                <td>ony.19161@gmail.com</td>
+                                <td>Any upcoming tour package in Sunamgonj</td>
+                                <td>Feb 01, 2023</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                          
+                    </div>
+                    
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Option Detail Container Start -->
+
+
+    <!-- Footer Start -->
+    
+    <div class="container-fluid bg-dark text-white border-top py-4 px-sm-3 px-md-5" style="border-color: rgba(256, 256, 256, .1) !important;">
+        <div class="row">
+            <div class="col-lg-6 text-center text-md-left mb-3 mb-md-0">
+                <p class="m-0 text-white-50">Copyright &copy; <a href="_self">TravelEasy</a>. All Rights Reserved.</a>
+                </p>
+            </div>
+        </div>
+    </div>
+    <!-- Footer End -->
+
+
+
+   
+</body>
+
+</html>

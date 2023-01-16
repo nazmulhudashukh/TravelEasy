@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>TRAVELER - Free Travel Website Template</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="Free HTML Templates" name="keywords">
+    <meta content="Free HTML Templates" name="description">
+
+    <!-- Favicon -->
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"> 
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+    <link href="lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css" rel="stylesheet" />
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/login.css" rel="stylesheet">
+    
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+    <script src="lib/easing/easing.min.js"></script>
+
+    <!-- Contact Javascript File -->
+    
+    <script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js">        
+    </script><script type="text/javascript" src="./js/additional-methods.js"></script>
+    <Script type="text/javascript" src="./js/utilities.js"></Script>
+    <script>
+        $(document).ready(function() {
+    
+            var userData = sessionStorage.getItem('userData');
+    
+            if (userData) {
+                var user = JSON.parse(userData);
+                navigateToPageByUser(user.Role);
+            } else {
+                console.log('user not found');
+            }
+    
+    
+            $("._s_SignInNavLink").click(function(e){
+                e.preventDefault();
+                if (!$("._s_SignInNavLink").hasClass('active')) {
+                    $("._s_SignInNavLink").addClass('active');
+                }
+                $("._s_SignUpNavLink").removeClass('active');
+                $("._s_LoginFormContainer").show();
+                $("._s_RegisterFormContainer").hide();
+            });
+            $("._s_SignUpNavLink").click(function(e){
+                e.preventDefault();
+                if (!$("._s_SignUpNavLink").hasClass('active')) {
+                    $("._s_SignUpNavLink").addClass('active');
+                }
+                $("._s_SignInNavLink").removeClass('active');
+                $("._s_LoginFormContainer").hide();
+                $("._s_RegisterFormContainer").show();
+            });
+    
+    
+            $("#userRegisterForm").validate({
+                rules: {
+                    fullName: {
+                        required: true,
+                        minlength: 3,
+                        maxlength: 50  
+                    },
+                    email: {
+                        required: true,
+                        email: true
+                    },
+                    phoneNo: {
+                        required: true,
+                        phoneBD: true
+                    },
+                    address: {
+                        required: true,
+                        minlength: 5,
+                        maxlength: 150 
+                    },
+                    registerUsername: {
+                        required: true,
+                        minlength: 5,
+                        maxlength: 15, 
+                        remote: {
+                            url: "/users/validateUsername",
+                            type: "GET"
+                        } 
+                    },
+                    registerPassword: {
+                        required: true,
+                        minlength: 5,
+                        maxlength: 15
+                    },
+                    confirmPassword: {
+                        required: true,
+                        minlength: 5,
+                        maxlength: 15,
+                        equalTo: "._s_RegisterPassword" //for checking both passwords are same or not
+                    }                
+                },
+                messages: {
+                    fullName: {required: " Please enter your full name"},
+                    email: {required: " Please enter your email"},
+                    phoneNo: {required: " Please enter your phone no"},
+                    address: {required: " Please enter your address"},
+                    registerUsername: {
+                        required: " Please enter username",
+                        minlength: " Your username must consist of at least 5 characters",
+                        remote: " Username already exists"
+                    },
+                    registerPassword: {
+                        required: " Please enter password",
+                        minlength: " Your password must be consist of at least 5 characters"
+                    }
+                },
+                submitHandler: function(form) {
+                    
+                    let newUser = {
+                        "name": $("._s_Name").val(),
+                        "email": $("._s_Email").val(),
+                        "mobileNo": $("._s_PhoneNo").val(),
+                        "address": $("._s_Address").val(),
+                        "username": $("._s_RegisterUsername").val(),
+                        "password": $("._s_RegisterPassword").val()
+                    }
+                    
+    
+                    registerUser(newUser);
+    
+    
+                    return false;
+                }
+            });
+    
+            
+            $("#loginForm").validate({
+                rules: {
+                    loginUsername: {
+                        required: true,
+                        minlength: 5
+                    },
+                    loginPassword: {
+                        required: true,
+                        minlength: 5
+                    }
+                },
+                messages: {
+                    loginUsername: {
+                        required: " Please enter username",
+                        minlength: " Your username must consist of at least 5 characters"
+                    },
+                    loginPassword: {
+                        required: " Please enter password",
+                        minlength: " Your password must be consist of at least 5 characters"
+                    }
+                },
+                submitHandler: function(form) {                
+                    let rUser = {
+                        "username": $("._s_LoginUsername").val(),
+                        "password": $("._s_LoginPassword").val()
+                    }
+    
+                    submitLogin(rUser);
+    
+                    return false;
+                }
+            });
+        });
+    
+        function navigateToPageByUser(userRole) {
+            if (isAdmin(userRole)) {
+                window.location.href = '/admin.html';
+            } else {
+                window.location.href = '/index.html';
+            }
+        }
+    
+        function submitLogin(rUser) {
+            var requestHeaders = new Headers();
+            requestHeaders.append("Content-Type", "application/json");
+    
+            var requestOptions = {
+                method: 'POST',
+                headers: requestHeaders,
+                body: JSON.stringify(rUser)
+            };
+    
+            fetch("/users/login", requestOptions)
+                .then(response => response.json())
+                    .then(result => {                    
+    
+                        if (result.success == true) {
+                            sessionStorage.setItem('userData', JSON.stringify(result.data));
+                            navigateToPageByUser(result.data.Role);
+                        } else{
+                            alert('Invalid credentials !!!!');
+                        }
+                    })
+                    .catch(error => alert('error', error));
+        }
+    
+        
+    
+        function registerUser(newUser) {
+            $('#loading').show();
+            var requestHeaders = new Headers();
+            requestHeaders.append("Content-Type", "application/json");
+    
+            var requestOptions = {
+                method: 'POST',
+                headers: requestHeaders,
+                body: JSON.stringify(newUser)
+            };
+    
+            fetch("/users/create", requestOptions)
+                .then(response => response.json())
+                    .then(result => {
+    
+                        $('#loading').hide();  
+                        $('#userRegisterForm')[0].reset();
+    
+                        if (result.success == true) {
+                            $('._s_Modal_Message').html('<p class="alert alert-success" role="alert">Registration successful.<br/>You can now login with your username: "' + newUser.username + '"</p>');
+                        } else{
+                            $('._s_Modal_Message').html('<p class="alert alert-danger" role="alert">Registration failed.<br/>' + result.message + '<br/>Please try again later.</p>');
+                        }
+    
+                        $("#notificationModal").modal('show');
+                    })
+                    .catch(error => alert('error', error));
+        }
+    </script>
+</head>
+
+<body>
+   
+      <!-- The Modal -->
+  <div class="modal hide" id="notificationModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+      
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Notification</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        
+        <!-- Modal body -->
+        <div class="modal-body _s_Modal_Message">
+        </div>
+        
+        <!-- Modal footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+    <!-- Navbar Start -->
+    <div class="container-fluid position-relative nav-bar p-0">
+        <div class="container-lg position-relative p-0 px-lg-3" style="z-index: 9;">
+            <nav class="navbar navbar-expand-lg bg-light navbar-light shadow-lg py-3 py-lg-0 pl-3 pl-lg-5">
+                <a href="" class="navbar-brand">
+                    <h1 class="m-0 text-primary"><span class="text-dark">Travel</span>Easy</h1>
+                </a>
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse justify-content-between px-3" id="navbarCollapse">
+                    <div class="navbar-nav ml-auto py-0">
+                        <a href="" class="nav-item nav-link active _s_SignInNavLink">Sign In</a>
+                        <a href="" class="nav-item nav-link _s_SignUpNavLink">Sign Up</a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </div>
+    <!-- Navbar End -->
+
+    <!-- Header Start -->
+    <div class="container-fluid page-header">
+        <div class="container">
+            <div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 110px">
+            </div>
+        </div>
+    </div>
+    <!-- Header End -->
+    <!-- SignIn/SignUp Start -->
+    <div class="container-fluid login mt-5 pb-5">
+        <div class="container pb-5">
+            <div class="bg-light shadow" style="padding: 30px;">
+                <div class="row align-items-center" style="min-height: 60px;">
+                    <div class="col-md-12">
+                        <div class="row _s_LoginFormContainer">
+                            <div class="col-md-3"></div>
+                            <div class="col-md-6">
+                                <div class="mb-3 mb-md-0">
+                                    <div class="card border-0">
+                                        <div class="card-header bg-primary text-center p-4">
+                                            <h3 class="text-white m-0">Sign in to your account</h3>
+                                        </div>
+                                        <div class="card-body rounded-bottom bg-white p-5 login-form-container">
+                                            <form id="loginForm" class="login-form">
+                                                <div class="form-group">
+                                                    <input name='loginUsername' type="text" class="form-control _s_LoginUsername" placeholder="Username" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <input name='loginPassword' type="password" class="form-control _s_LoginPassword" placeholder="Password"/>
+                                                </div>
+                                                <div class="form-group">
+                                                    <input class="btn btn-primary btn-block" type="submit" style="height: 47px; margin-top: -2px;" value="Sign In"/>
+                                                </div>                                                
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                    
+
+                                </div>
+                            </div>
+                            <div class="col-md-3"></div>
+                        </div>
+                        <div class="row _s_RegisterFormContainer" style="display: none;">
+                                <div class="col-md-3"></div>
+                                <div class="col-md-6">
+                                    <div class="mb-3 mb-md-0">
+                                        <div class="card border-0">
+                                            <div class="card-header bg-primary text-center p-4">
+                                                <h3 class="text-white m-0">Sign up to create your account</h3>
+                                            </div>
+                                            <div class="card-body rounded-bottom bg-white p-5 login-form-container">
+                                                <form id="userRegisterForm" autocomplete="off">
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <input type="text" name="fullName" class="form-control _s_Name" placeholder="Full Name"  />
+                                                            </div>
+                                                        </div>        
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <input type="text" name="phoneNo" class="form-control _s_PhoneNo" placeholder="Phone Number"  />
+                                                            </div>
+                                                        </div>                                                        
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input type="email" name="email" class="form-control _s_Email" placeholder="Email" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input type="text" name="address" class="form-control _s_Address" placeholder="Address" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input type="text" name="registerUsername" class="form-control _s_RegisterUsername" placeholder="Username" />
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <input type="password" name="registerPassword" class="form-control _s_RegisterPassword" placeholder="Password"  />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <input type="password" name="confirmPassword" class="form-control" placeholder="Confirm Password"  />
+                                                            </div> 
+                                                        </div>
+                                                    </div>
+                                                    
+                                                     
+                                                    <div class="form-group">
+                                                        <input class="btn btn-primary btn-block" type="submit" style="height: 47px; margin-top: -2px;"  value="Sign Up"/>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>                                    
+                                </div>
+                                <div class="col-md-3"></div>                     
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- SignIn/SignUp End -->
+
+
+    
+</body>
+
+</html>
